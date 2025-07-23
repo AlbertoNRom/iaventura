@@ -1,0 +1,575 @@
+---
+import '../styles/global.css';
+---
+
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		
+		<!-- SEO Meta Tags -->
+		<title>IA Ventura - Generador de Itinerarios de Viaje con Inteligencia Artificial</title>
+		<meta name="description" content="Crea itinerarios de viaje personalizados con IA. Planifica tu aventura perfecta visitando múltiples ciudades con recomendaciones inteligentes y actividades únicas." />
+		<meta name="keywords" content="itinerario viaje, planificador viaje, inteligencia artificial, turismo, vacaciones, ciudades, actividades, recomendaciones viaje" />
+		<meta name="author" content="IA Ventura" />
+		<meta name="robots" content="index, follow" />
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://iaventura.vercel.app/" />
+		<meta property="og:title" content="IA Ventura - Generador de Itinerarios de Viaje con IA" />
+		<meta property="og:description" content="Crea itinerarios de viaje personalizados con inteligencia artificial. Planifica tu aventura perfecta." />
+		<meta property="og:image" content="https://iaventura.vercel.app/og-image.jpg" />
+		
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content="https://iaventura.vercel.app/" />
+		<meta property="twitter:title" content="IA Ventura - Generador de Itinerarios de Viaje con IA" />
+		<meta property="twitter:description" content="Crea itinerarios de viaje personalizados con inteligencia artificial. Planifica tu aventura perfecta." />
+		<meta property="twitter:image" content="https://iaventura.vercel.app/og-image.jpg" />
+		
+		<!-- Canonical URL -->
+		<link rel="canonical" href="https://iaventura.vercel.app/" />
+	</head>
+	<body class="min-h-screen bg-gradient-travel">
+		<div class="container mx-auto px-4 py-8">
+			<!-- Header -->
+			<header class="text-center mb-12 animate-fade-in">
+				<h1 class="text-5xl font-bold text-white mb-4">🌍 IAventura</h1>
+				<p class="text-xl text-white/90">Planifica tu viaje perfecto con inteligencia artificial</p>
+			</header>
+
+			<!-- Formulario Principal -->
+			<div class="max-w-2xl mx-auto bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 animate-slide-in">
+				<form id="travel-form" class="space-y-6">
+					<!-- Ciudades -->
+					<div>
+						<label for="cities" class="block text-lg font-semibold text-gray-700 mb-3">
+							🏙️ Ciudades a visitar
+						</label>
+						<div id="cities-container" class="space-y-3">
+							<div class="city-input-group flex gap-2 items-center">
+								<input 
+									type="text" 
+									class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all shadow-sm hover:shadow-md bg-white text-sm" 
+									placeholder="Ej: Madrid, España"
+									required
+								/>
+								<button type="button" class="remove-city w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 rounded-full transition-all duration-200 flex items-center justify-center text-sm font-medium" style="display: none;" title="Eliminar ciudad">×</button>
+							</div>
+						</div>
+						<button type="button" id="add-city" class="mt-3 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 hover-scale shadow-md hover:shadow-lg border border-blue-400/20 backdrop-blur-sm text-sm">
+							<span class="flex items-center justify-center gap-2">
+								<span>➕</span>
+								<span>Añadir ciudad</span>
+							</span>
+						</button>
+					</div>
+
+					<!-- Número de días -->
+					<div>
+						<label for="days" class="block text-lg font-semibold text-gray-700 mb-3">
+							📅 Número de días
+						</label>
+						<input 
+							id="days" 
+							type="number" 
+							min="1" 
+							max="30" 
+							value="3" 
+							class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all shadow-sm hover:shadow-md bg-white text-sm" 
+							placeholder="Ej: 5"
+							required
+						/>
+					</div>
+
+					<!-- Botón Submit -->
+				<button 
+					type="submit" 
+					id="submit-btn"
+					class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 text-lg shadow-lg hover:shadow-xl"
+				>
+					✨ Planificar mi viaje
+				</button>
+				</form>
+			</div>
+
+			<!-- Loading State -->
+			<div id="loading" class="hidden max-w-2xl mx-auto mt-8 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 text-center">
+				<div class="animate-pulse-custom">
+					<div class="text-4xl mb-4">🤖</div>
+					<p class="text-lg text-gray-600">La IA está creando tu itinerario perfecto...</p>
+				</div>
+			</div>
+
+			<!-- Resultados -->
+			<div id="results" class="hidden max-w-4xl mx-auto mt-8">
+				<div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 animate-fade-in">
+					<h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">📋 Tu Itinerario Personalizado</h2>
+					<div id="itinerary-content" class="space-y-6"></div>
+					<button id="new-trip" class="mt-8 w-full bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition-all">
+						🔄 Planificar otro viaje
+					</button>
+				</div>
+			</div>
+
+			<!-- Historial -->
+			<div id="history" class="max-w-4xl mx-auto mt-12">
+				<h2 class="text-2xl font-bold text-white mb-6 text-center">📚 Historial de Viajes</h2>
+				<div id="history-content" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3"></div>
+			</div>
+		</div>
+
+		<!-- Modal para Monumentos -->
+		<div id="monument-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+			<div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+				<div class="p-6 border-b border-gray-200">
+					<div class="flex justify-between items-center">
+						<h3 id="monument-title" class="text-2xl font-bold text-gray-800"></h3>
+						<button onclick="closeMonumentModal()" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+					</div>
+					<p id="monument-location" class="text-gray-600 mt-2"></p>
+				</div>
+				<div class="p-6">
+					<div class="bg-gray-100 rounded-lg p-4 text-center">
+						<div class="text-6xl mb-4">🗺️</div>
+						<p class="text-gray-600 mb-4">Vista de Google Maps</p>
+						<div id="monument-map" class="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+							<iframe id="monument-iframe" class="w-full h-full rounded-lg" frameborder="0" style="border:0" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Modal para Gastronomía -->
+		<div id="gastronomy-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+			<div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+				<div class="p-6 border-b border-gray-200">
+					<div class="flex justify-between items-center">
+						<h3 id="gastronomy-title" class="text-2xl font-bold text-gray-800"></h3>
+						<button onclick="closeGastronomyModal()" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+					</div>
+				</div>
+				<div class="p-6">
+					<div class="text-center mb-6">
+						<div class="text-6xl mb-4">🍽️</div>
+						<p class="text-gray-600">Restaurantes recomendados</p>
+					</div>
+					<div id="restaurant-carousel" class="relative">
+						<div id="restaurant-container" class="flex transition-transform duration-300 ease-in-out">
+							<!-- Los restaurantes se cargarán aquí dinámicamente -->
+						</div>
+						<button id="prev-restaurant" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-colors">
+							<svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+							</svg>
+						</button>
+						<button id="next-restaurant" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-colors">
+							<svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+							</svg>
+						</button>
+					</div>
+					<div id="restaurant-indicators" class="flex justify-center mt-4 space-x-2">
+						<!-- Los indicadores se cargarán aquí dinámicamente -->
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			// Estado de la aplicación
+			let travelHistory: Array<{id: string, cities: string[], days: number, itinerary: string, date: string}> = [];
+
+			// Cargar historial del localStorage
+			function loadHistory() {
+				const saved = localStorage.getItem('travelHistory');
+				if (saved) {
+					travelHistory = JSON.parse(saved);
+					renderHistory();
+				}
+			}
+
+			// Guardar historial en localStorage
+			function saveHistory() {
+				localStorage.setItem('travelHistory', JSON.stringify(travelHistory));
+			}
+
+			// Función para actualizar el límite de días según el número de ciudades
+			function updateDaysLimit() {
+				const cityInputs = document.querySelectorAll('.city-input-group');
+				const daysInput = document.getElementById('days') as HTMLInputElement;
+				const cityCount = cityInputs.length;
+				
+				let maxDays = 10; // 1 ciudad
+				if (cityCount === 2) maxDays = 15;
+				else if (cityCount === 3) maxDays = 21;
+				else if (cityCount === 4) maxDays = 30;
+				
+				daysInput.max = maxDays.toString();
+				
+				// Si el valor actual excede el nuevo límite, ajustarlo
+				if (parseInt(daysInput.value) > maxDays) {
+					daysInput.value = maxDays.toString();
+				}
+			}
+
+			// Añadir ciudad
+			document.getElementById('add-city')?.addEventListener('click', () => {
+				const container = document.getElementById('cities-container');
+				const cityInputs = container?.querySelectorAll('.city-input-group');
+				
+				if (cityInputs && cityInputs.length < 4) {
+					const newCityGroup = document.createElement('div');
+				newCityGroup.className = 'city-input-group flex gap-2 items-center';
+				newCityGroup.innerHTML = `
+					<input 
+						type="text" 
+						class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all shadow-sm hover:shadow-md bg-white text-sm" 
+						placeholder="Ej: Barcelona, España"
+						required
+					/>
+					<button type="button" class="remove-city w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 rounded-full transition-all duration-200 flex items-center justify-center text-sm font-medium" title="Eliminar ciudad">×</button>
+				`;
+					container?.appendChild(newCityGroup);
+					
+					// Añadir evento para eliminar
+					newCityGroup.querySelector('.remove-city')?.addEventListener('click', () => {
+						newCityGroup.remove();
+						updateRemoveButtons();
+						updateDaysLimit();
+					});
+					
+					updateRemoveButtons();
+					updateDaysLimit();
+				}
+			});
+
+			// Actualizar botones de eliminar
+			function updateRemoveButtons() {
+				const cityInputs = document.querySelectorAll('.city-input-group');
+				cityInputs.forEach((group, index) => {
+					const removeBtn = group.querySelector('.remove-city') as HTMLElement;
+					if (removeBtn) {
+						removeBtn.style.display = cityInputs.length > 1 ? 'block' : 'none';
+					}
+				});
+			}
+
+			// Llamada a la API para generar itinerario
+			async function generateItinerary(cities: string[], days: number): Promise<string> {
+				try {
+					const response = await fetch('/api/generate-itinerary', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({ cities, days })
+					});
+					
+					if (!response.ok) {
+						throw new Error('Error en la respuesta del servidor');
+					}
+					
+					const data = await response.json();
+					
+					if (!data.success) {
+						throw new Error(data.error || 'Error desconocido');
+					}
+					
+					return data.itinerary;
+				} catch (error) {
+					console.error('Error al generar itinerario:', error);
+					throw error;
+				}
+			}
+
+			// Renderizar historial
+			function renderHistory() {
+				const historyContent = document.getElementById('history-content');
+				if (!historyContent) return;
+				
+				historyContent.innerHTML = '';
+				
+				travelHistory.slice(-6).reverse().forEach(trip => {
+					const tripCard = document.createElement('div');
+					tripCard.className = 'bg-white/90 backdrop-blur-sm rounded-xl p-6 hover-scale hover-shadow transition-all cursor-pointer animate-fade-in';
+					tripCard.innerHTML = `
+						<div class="text-sm text-gray-500 mb-2">${trip.date}</div>
+						<h3 class="font-bold text-lg mb-2">${trip.cities.join(' → ')}</h3>
+						<p class="text-gray-600">${trip.days} días</p>
+					`;
+					
+					tripCard.addEventListener('click', () => {
+						document.getElementById('itinerary-content')!.innerHTML = trip.itinerary;
+						document.getElementById('results')!.classList.remove('hidden');
+						document.getElementById('results')!.scrollIntoView({ behavior: 'smooth' });
+					});
+					
+					historyContent.appendChild(tripCard);
+				});
+			}
+
+			// Manejar envío del formulario
+			document.getElementById('travel-form')?.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				
+				const cityInputs = document.querySelectorAll('.city-input-group input') as NodeListOf<HTMLInputElement>;
+				const daysInput = document.getElementById('days') as HTMLInputElement;
+				
+				const cities = Array.from(cityInputs).map(input => input.value.trim()).filter(city => city);
+				const days = parseInt(daysInput.value);
+				
+				if (cities.length === 0) {
+					alert('Por favor, añade al menos una ciudad');
+					return;
+				}
+				
+				// Mostrar loading
+				document.getElementById('loading')?.classList.remove('hidden');
+				document.getElementById('results')?.classList.add('hidden');
+				
+				try {
+					const itinerary = await generateItinerary(cities, days);
+					
+					// Guardar en historial
+					const trip = {
+						id: Date.now().toString(),
+						cities,
+						days,
+						itinerary,
+						date: new Date().toLocaleDateString('es-ES')
+					};
+					
+					travelHistory.push(trip);
+					saveHistory();
+					
+					// Mostrar resultados
+					document.getElementById('itinerary-content')!.innerHTML = itinerary;
+					document.getElementById('loading')?.classList.add('hidden');
+					document.getElementById('results')?.classList.remove('hidden');
+					
+					// Actualizar historial
+					renderHistory();
+					
+					// Scroll a resultados
+					document.getElementById('results')?.scrollIntoView({ behavior: 'smooth' });
+					
+				} catch (error) {
+					console.error('Error generando itinerario:', error);
+					document.getElementById('loading')?.classList.add('hidden');
+					alert('Error al generar el itinerario. Por favor, inténtalo de nuevo.');
+				}
+			});
+
+			// Botón nuevo viaje
+			document.getElementById('new-trip')?.addEventListener('click', () => {
+				document.getElementById('results')?.classList.add('hidden');
+				document.getElementById('travel-form')?.scrollIntoView({ behavior: 'smooth' });
+				
+				// Limpiar formulario
+				const cityInputs = document.querySelectorAll('.city-input-group input') as NodeListOf<HTMLInputElement>;
+				cityInputs.forEach(input => input.value = '');
+				(document.getElementById('days') as HTMLInputElement).value = '7';
+			});
+
+			// Tipos para las funciones globales
+			interface GlobalModalFunctions {
+				openMonumentModal: (cityName: string, monumentName: string, location: string) => void;
+				closeMonumentModal: () => void;
+				openGastronomyModal: (dishName: string, restaurants: string[]) => void;
+				closeGastronomyModal: () => void;
+			}
+
+			// Extender la interfaz Window
+			declare global {
+				interface Window extends GlobalModalFunctions {}
+			}
+
+			// Variables globales para el carrusel
+			let currentRestaurantIndex = 0;
+			let currentRestaurants: string[] = [];
+
+			// Función para abrir modal de monumentos
+			function openMonumentModal(cityName: string, monumentName: string, location: string) {
+				const modal = document.getElementById('monument-modal');
+				const title = document.getElementById('monument-title');
+				const locationElement = document.getElementById('monument-location');
+				const iframe = document.getElementById('monument-iframe') as HTMLIFrameElement;
+				
+				if (title) title.textContent = monumentName;
+				if (locationElement) locationElement.textContent = `📍 ${location}, ${cityName}`;
+				
+				// Crear URL de Google Maps embed
+				const query = encodeURIComponent(`${monumentName} ${location} ${cityName}`);
+				const embedUrl = `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.PUBLIC_MAPS_EMBED_API_KEY}&q=${query}`;
+				
+				if (iframe) {
+					iframe.src = embedUrl;
+				}
+				
+				if (modal) {
+					modal.classList.remove('hidden');
+					document.body.style.overflow = 'hidden';
+				}
+			}
+
+			// Función para cerrar modal de monumentos
+			function closeMonumentModal() {
+				const modal = document.getElementById('monument-modal');
+				const iframe = document.getElementById('monument-iframe') as HTMLIFrameElement;
+				
+				if (modal) {
+					modal.classList.add('hidden');
+					document.body.style.overflow = 'auto';
+				}
+				
+				if (iframe) {
+					iframe.src = '';
+				}
+			}
+
+			// Función para abrir modal de gastronomía
+			function openGastronomyModal(dishName: string, restaurants: string[]) {
+				const modal = document.getElementById('gastronomy-modal');
+				const title = document.getElementById('gastronomy-title');
+				
+				if (title) title.textContent = dishName;
+				
+				currentRestaurants = restaurants;
+				currentRestaurantIndex = 0;
+				
+				renderRestaurantCarousel();
+				
+				if (modal) {
+					modal.classList.remove('hidden');
+					document.body.style.overflow = 'hidden';
+				}
+			}
+
+			// Función para cerrar modal de gastronomía
+			function closeGastronomyModal() {
+				const modal = document.getElementById('gastronomy-modal');
+				
+				if (modal) {
+					modal.classList.add('hidden');
+					document.body.style.overflow = 'auto';
+				}
+			}
+
+			// Función para renderizar el carrusel de restaurantes
+			function renderRestaurantCarousel() {
+				const container = document.getElementById('restaurant-container');
+				const indicators = document.getElementById('restaurant-indicators');
+				
+				if (!container || !indicators) return;
+				
+				// Limpiar contenido anterior
+				container.innerHTML = '';
+				indicators.innerHTML = '';
+				
+				// Crear tarjetas de restaurantes
+				currentRestaurants.forEach((restaurant, index) => {
+					const restaurantCard = document.createElement('div');
+					restaurantCard.className = 'w-full flex-shrink-0 px-4';
+					restaurantCard.innerHTML = `
+						<div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-8 text-center border border-orange-200 shadow-lg">
+							<div class="text-4xl mb-4">🍴</div>
+							<h4 class="text-xl font-bold text-gray-800 mb-2">${restaurant}</h4>
+							<p class="text-gray-600 mb-4">Restaurante recomendado</p>
+							<div class="flex justify-center space-x-1">
+								<span class="text-yellow-400">⭐</span>
+								<span class="text-yellow-400">⭐</span>
+								<span class="text-yellow-400">⭐</span>
+								<span class="text-yellow-400">⭐</span>
+								<span class="text-gray-300">⭐</span>
+							</div>
+						</div>
+					`;
+					container.appendChild(restaurantCard);
+					
+					// Crear indicador
+					const indicator = document.createElement('button');
+					indicator.className = `w-3 h-3 rounded-full transition-colors ${
+						index === currentRestaurantIndex ? 'bg-orange-500' : 'bg-gray-300'
+					}`;
+					indicator.addEventListener('click', () => {
+						currentRestaurantIndex = index;
+						updateCarouselPosition();
+						updateIndicators();
+					});
+					indicators.appendChild(indicator);
+				});
+				
+				updateCarouselPosition();
+			}
+
+			// Función para actualizar la posición del carrusel
+			function updateCarouselPosition() {
+				const container = document.getElementById('restaurant-container');
+				if (container) {
+					const translateX = -currentRestaurantIndex * 100;
+					container.style.transform = `translateX(${translateX}%)`;
+				}
+			}
+
+			// Función para actualizar indicadores
+			function updateIndicators() {
+				const indicators = document.querySelectorAll('#restaurant-indicators button');
+				indicators.forEach((indicator, index) => {
+					if (index === currentRestaurantIndex) {
+						indicator.className = 'w-3 h-3 rounded-full transition-colors bg-orange-500';
+					} else {
+						indicator.className = 'w-3 h-3 rounded-full transition-colors bg-gray-300';
+					}
+				});
+			}
+
+			// Event listeners para los botones del carrusel
+			document.getElementById('prev-restaurant')?.addEventListener('click', () => {
+				if (currentRestaurantIndex > 0) {
+					currentRestaurantIndex--;
+					updateCarouselPosition();
+					updateIndicators();
+				}
+			});
+
+			document.getElementById('next-restaurant')?.addEventListener('click', () => {
+				if (currentRestaurantIndex < currentRestaurants.length - 1) {
+					currentRestaurantIndex++;
+					updateCarouselPosition();
+					updateIndicators();
+				}
+			});
+
+			// Cerrar modales al hacer clic fuera
+			document.getElementById('monument-modal')?.addEventListener('click', (e) => {
+				if (e.target === e.currentTarget) {
+					closeMonumentModal();
+				}
+			});
+
+			document.getElementById('gastronomy-modal')?.addEventListener('click', (e) => {
+				if (e.target === e.currentTarget) {
+					closeGastronomyModal();
+				}
+			});
+
+			// Hacer las funciones globales para que puedan ser llamadas desde el HTML
+			window.openMonumentModal = openMonumentModal;
+			window.closeMonumentModal = closeMonumentModal;
+			window.openGastronomyModal = openGastronomyModal;
+			window.closeGastronomyModal = closeGastronomyModal;
+
+			// Inicializar
+			document.addEventListener('DOMContentLoaded', () => {
+				loadHistory();
+				updateRemoveButtons();
+				updateDaysLimit();
+			});
+		</script>
+	</body>
+</html>
